@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import shutil
 import argparse
@@ -57,13 +58,18 @@ def main(argv):
             command.append(f"--{param}={name}")
 
     print("Running '{}' ...".format(' '.join(command)))
-    ret = subprocess.run(command, shell=False, check=False)
+    environ = os.environ.copy()
+    environ.update({
+        "POETRY_VIRTUALENVS_CREATE": "false",
+        "POETRY_VIRTUALENVS_PREFER_ACTIVE_PYTHON": "true",
+    })
+    ret = subprocess.run(command, shell=False, check=False, env=environ)
     if ret.returncode:
         parser.exit(status=1)
 
     command = [poetry, "run"] + unknown_arguments
     print("Running '{}' ...".format(' '.join(command)))
-    ret = subprocess.run(command, shell=False, check=False)
+    ret = subprocess.run(command, shell=False, check=False, env=environ)
     if ret.returncode:
         parser.exit(status=1)
     parser.exit(status=0)
