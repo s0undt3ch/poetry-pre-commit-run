@@ -9,6 +9,11 @@ import subprocess
 
 def main(argv):
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--echo-commands",
+        action="store_true",
+        help="Echo the commands that are run"
+    )
     poetry_install_args = parser.add_argument_group(title="Poetry Install Options")
     poetry_install_args.add_argument(
         "--no-root",
@@ -56,7 +61,10 @@ def main(argv):
         for name in getattr(args, param):
             command.append(f"--{param}={name}")
 
-    print("Running '{}' ...".format(' '.join(command)))
+    if args.echo_commands:
+        print("Running '{}' ...".format(' '.join(command)))
+    else:
+        command.join("--quiet")
     environ = os.environ.copy()
     environ.update({
         "POETRY_VIRTUALENVS_CREATE": "false",
@@ -67,7 +75,8 @@ def main(argv):
         parser.exit(status=1)
 
     command = [poetry, "run"] + unknown_arguments
-    print("Running '{}' ...".format(' '.join(command)))
+    if args.echo_commands:
+        print("Running '{}' ...".format(' '.join(command)))
     ret = subprocess.run(command, shell=False, check=False, env=environ)
     if ret.returncode:
         parser.exit(status=1)
