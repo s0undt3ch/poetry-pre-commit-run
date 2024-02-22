@@ -64,7 +64,7 @@ def main(argv):
     if args.echo_commands:
         print("Running '{}' ...".format(' '.join(command)))
     else:
-        command.join("--quiet")
+        command.append("--quiet")
     environ = os.environ.copy()
     environ.update({
         "POETRY_VIRTUALENVS_CREATE": "false",
