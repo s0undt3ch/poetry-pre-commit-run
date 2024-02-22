@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import sys
+import shutil
+import argparse
+import subprocess
+
+
+def main(argv):
+    parser = argparse.ArgumentParser()
+    poetry_install_args = parser.add_argument_group(title="Poetry Install Options")
+    poetry_install_args.add_argument(
+        "--no-root",
+        action="store_true",
+        help="Do not install the root package (the current project).",
+        default=False,
+    )
+    poetry_install_args.add_argument(
+        "--only-root",
+        action="store_true",
+        help="Do not install the root package (the current project).",
+        default=False,
+    )
+    poetry_install_args.add_argument(
+        "--without",
+        action="append",
+        default=[],
+        help="The dependency groups to ignore. (multiple values allowed)"
+    )
+    poetry_install_args.add_argument(
+        "--with",
+        action="append",
+        default=[],
+        help="The optional dependency groups to include. (multiple values allowed)"
+    )
+    poetry_install_args.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        help="The only dependency groups to include. (multiple values allowed)"
+    )
+    parser.add_argument("run-command", nargs='*')
+
+    poetry = shutil.which("poetry")
+    if poetry is None:
+        print("The 'poetry' binary was not find in $PATH")
+        parser.exit(status=1)
+
+    args, unknown_arguments = parser.parse_known_args(args=argv)
+    command = [poetry, "install"]
+    if args.no_root:
+        command.append("--no-root")
+    if args.only_root:
+        command.append("--only-root")
+    for param in ("with", "without", "only"):
+        for name in getattr(args, param):
+            command.append(f"--{param}={name}")
+
+    print("Running '{}' ...".format(' '.join(command)))
+    ret = subprocess.run(command, shell=False, check=False)
+    if ret.returncode:
+        parser.exit(status=1)
+
+    command = [poetry, "run"] + unknown_arguments
+    print("Running '{}' ...".format(' '.join(command)))
+    ret = subprocess.run(command, shell=False, check=False)
+    if ret.returncode:
+        parser.exit(status=1)
+    parser.exit(status=0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
