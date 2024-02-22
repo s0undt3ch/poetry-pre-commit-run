@@ -40,7 +40,6 @@ def main(argv):
         default=[],
         help="The only dependency groups to include. (multiple values allowed)"
     )
-    parser.add_argument("run-command", nargs='*')
 
     poetry = shutil.which("poetry")
     if poetry is None:
