@@ -5,6 +5,7 @@ import sys
 import shutil
 import argparse
 import subprocess
+import filelock
 
 
 def main(argv):
@@ -70,9 +71,11 @@ def main(argv):
         "POETRY_VIRTUALENVS_CREATE": "false",
         "POETRY_VIRTUALENVS_PREFER_ACTIVE_PYTHON": "true",
     })
-    ret = subprocess.run(command, shell=False, check=False, env=environ)
-    if ret.returncode:
-        parser.exit(status=1)
+    lockfile = os.path.join(os.getcwd(), ".poetry-install-in-progress")
+    with filelock.SoftFileLock(lockfile, timeout=5*60):
+        ret = subprocess.run(command, shell=False, check=False, env=environ)
+        if ret.returncode:
+            parser.exit(status=1)
 
     command = [poetry, "run"] + unknown_arguments
     if args.echo_commands:

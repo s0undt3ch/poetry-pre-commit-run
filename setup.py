@@ -4,8 +4,8 @@ from setuptools import setup
 
 
 setup(
-    name='poetry-pre-commit-run',
-    version='0.0.0',
+    name="poetry-pre-commit-run",
+    version="0.0.0",
     scripts=["poetry-wrapper"],
-    install_requires=['poetry==1.7.1'],
+    install_requires=["poetry==1.7.1", "filelock"],
 )
